@@ -237,9 +237,9 @@ class _MeiroSdkImpl with WidgetsBindingObserver {
   Future<void> performSync() => _syncManager.sync();
 
   Future<void> trackEventInternal(
-    MeiroEventType type,
-    [Map<String, Object?> properties = const <String, Object?>{}],
-  ) async {
+    MeiroEventType type, [
+    Map<String, Object?> properties = const <String, Object?>{},
+  ]) async {
     if (!_enabled) {
       return;
     }

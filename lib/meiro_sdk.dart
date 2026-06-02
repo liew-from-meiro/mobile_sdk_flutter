@@ -1,4 +1,5 @@
 /// Flutter SDK for collecting mobile events for Meiro Data Platform.
+library;
 
 export 'src/audience.dart';
 export 'src/configuration.dart';
