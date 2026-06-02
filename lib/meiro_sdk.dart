@@ -1,5 +1,4 @@
 /// Flutter SDK for collecting mobile events for Meiro Data Platform.
-library meiro_sdk;
 
 export 'src/audience.dart';
 export 'src/configuration.dart';
@@ -7,4 +6,3 @@ export 'src/meiro_navigator_observer.dart';
 export 'src/meiro_sdk.dart';
 export 'src/notifications.dart'
     show MeiroNotificationAction, MeiroNotificationData, MeiroNotifications;
-

@@ -18,7 +18,9 @@ Future<void> main() async {
   runApp(const ExampleApp());
 }
 
+/// Example application.
 class ExampleApp extends StatelessWidget {
+  /// Creates the example application.
   const ExampleApp({super.key});
 
   @override
@@ -33,7 +35,9 @@ class ExampleApp extends StatelessWidget {
   }
 }
 
+/// First example screen.
 class FirstScreen extends StatelessWidget {
+  /// Creates the first example screen.
   const FirstScreen({super.key});
 
   @override
@@ -50,7 +54,9 @@ class FirstScreen extends StatelessWidget {
   }
 }
 
+/// Second example screen.
 class SecondScreen extends StatelessWidget {
+  /// Creates the second example screen.
   const SecondScreen({super.key});
 
   @override
@@ -60,4 +66,3 @@ class SecondScreen extends StatelessWidget {
     );
   }
 }
-

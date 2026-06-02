@@ -59,6 +59,7 @@ final class MeiroNotificationDeepLinkAction extends MeiroNotificationAction {
   const MeiroNotificationDeepLinkAction(this.url);
 
   /// Deeplink URL.
+  @override
   final Uri url;
 }
 
@@ -68,6 +69,7 @@ final class MeiroNotificationBrowserAction extends MeiroNotificationAction {
   const MeiroNotificationBrowserAction(this.url);
 
   /// Browser URL.
+  @override
   final Uri url;
 }
 
@@ -202,6 +204,8 @@ class MeiroNotificationData {
   static const _urlKey = 'url';
   static const _browserAction = 'browser';
   static const _deeplinkAction = 'deeplink';
+
+  /// Data payload key used to identify Meiro FCM messages.
   static const isMeiroMessageKey = 'is_meiro_message';
 
   static const _reservedKeys = {
