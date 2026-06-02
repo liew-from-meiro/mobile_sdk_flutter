@@ -1,0 +1,157 @@
+# Meiro Flutter SDK
+
+Meiro Flutter SDK collects mobile events from Flutter applications and sends them to Meiro Data Platform.
+
+The SDK supports Android and iOS.
+
+## Installation
+
+Add the package to your app:
+
+```yaml
+dependencies:
+  meiro_sdk:
+    git:
+      url: https://github.com/meiroio/mobile_sdk_flutter.git
+```
+
+The repository is currently private and `publish_to` is disabled.
+
+## Getting Started
+
+Initialize the SDK before `runApp`:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:meiro_sdk/meiro_sdk.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await MeiroSdk.init(
+    configuration: MeiroConfiguration(
+      endpoint: Uri.parse('https://my.meiro.endpoint/'),
+      appId: 'your-app-id',
+      firebaseProjectId: 'your-firebase-project-id',
+      debugMode: true,
+    ),
+  );
+
+  runApp(const App());
+}
+```
+
+## Configuration
+
+```dart
+MeiroConfiguration(
+  endpoint: Uri.parse('https://my.meiro.endpoint/'),
+  appId: 'your-app-id',
+  debugMode: false,
+  language: 'en',
+  firebaseProjectId: 'firebase-project-id',
+  automaticTrackingOptions: const MeiroAutomaticTrackingOptions(
+    screenViewTracking: true,
+    lifecycleEventsTracking: true,
+    adIdTracking: true,
+  ),
+  pushNotifications: const MeiroPushNotificationsConfiguration(
+    pushEnabled: true,
+    channelId: 'meiro_notifications',
+    channelName: 'Meiro',
+    channelDescription: 'Notifications',
+    androidSmallIcon: '@mipmap/ic_launcher',
+  ),
+)
+```
+
+## Event Tracking
+
+```dart
+await MeiroSdk.trackCustomEvent({
+  'name': 'App opened',
+  'product_id': '123',
+});
+
+await MeiroSdk.trackLinkClick(Uri.parse('https://example.com'));
+
+await MeiroSdk.trackScreenView(
+  'product_detail',
+  properties: {'product_id': '123'},
+);
+```
+
+The SDK automatically attaches app, OS, device, Firebase, user, and session metadata.
+
+## Screen Tracking
+
+For Flutter navigation, add `MeiroNavigatorObserver`:
+
+```dart
+MaterialApp(
+  navigatorObservers: [MeiroNavigatorObserver()],
+  routes: {
+    '/': (_) => const HomeScreen(),
+    '/details': (_) => const DetailsScreen(),
+  },
+)
+```
+
+The default observer uses `route.settings.name` as the screen name. For custom routers, provide a custom resolver or call `MeiroSdk.trackScreenView` manually.
+
+## Push Messaging
+
+The SDK integrates with `firebase_messaging` and `flutter_local_notifications`.
+
+When `pushEnabled` is true:
+
+- FCM token refreshes are passed to `MeiroSdk.setFcmToken`.
+- Meiro foreground messages are displayed locally.
+- `fcm_message_received` and `fcm_message_click` events are tracked.
+- Click actions support `app`, `browser`, and `deeplink`.
+
+The SDK does not request notification permissions. Your app must request permissions on Android 13+ and iOS.
+
+For custom FCM handling, check messages with:
+
+```dart
+if (MeiroNotifications.isMeiroMessage(message)) {
+  await MeiroSdk.showRemoteMessage(message);
+}
+```
+
+## Audience API
+
+```dart
+final result = await MeiroSdk.audience.wbs(
+  instance: 'client-instance',
+  segment: 42,
+  parameters: {'category_id': '1305'},
+);
+
+print(result.returnedAttributes);
+print(result.data);
+```
+
+## Offline Support
+
+Events are sent immediately. If sending fails, the serialized event payload is stored in a local SQLite queue for up to 24 hours. The SDK retries queued events on app start, foreground, and network connectivity changes.
+
+## Advertising ID
+
+When `adIdTracking` is enabled, the SDK attempts to resolve the advertising ID using the `advertising_id` plugin.
+
+Apps are responsible for platform policy and permission requirements:
+
+- Android apps using advertising ID must satisfy Google Play AD_ID declaration requirements.
+- iOS apps must handle App Tracking Transparency before IDFA can be returned.
+
+## Development
+
+Expected checks:
+
+```sh
+flutter pub get
+flutter analyze
+flutter test
+```
