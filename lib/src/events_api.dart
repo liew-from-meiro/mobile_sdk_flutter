@@ -12,7 +12,6 @@ class MeiroEventsApi {
       _eventsUrl = endpoint.replace(
         pathSegments: [
           ...endpoint.pathSegments,
-          'mobile-sdk',
         ].where((segment) => segment.isNotEmpty).toList(),
       );
 
