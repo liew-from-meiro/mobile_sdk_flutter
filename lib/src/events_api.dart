@@ -7,15 +7,13 @@ import 'event.dart';
 /// HTTP client for the Meiro mobile event endpoint.
 class MeiroEventsApi {
   /// Creates an event API client.
-  MeiroEventsApi({
-    required Uri endpoint,
-    http.Client? client,
-  })  : _client = client ?? http.Client(),
-        _eventsUrl = endpoint.replace(
-          pathSegments: [...endpoint.pathSegments, 'meiro_mobile']
-              .where((segment) => segment.isNotEmpty)
-              .toList(),
-        );
+  MeiroEventsApi({required Uri endpoint, http.Client? client})
+    : _client = client ?? http.Client(),
+      _eventsUrl = endpoint.replace(
+        pathSegments: [
+          ...endpoint.pathSegments,
+        ].where((segment) => segment.isNotEmpty).toList(),
+      );
 
   final http.Client _client;
   final Uri _eventsUrl;
@@ -62,4 +60,3 @@ class MeiroApiException implements Exception {
   @override
   String toString() => 'MeiroApiException($statusCode): $message';
 }
-
