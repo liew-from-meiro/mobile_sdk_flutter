@@ -44,6 +44,32 @@ void main() {
         'https://cdp.inst.meiro.io/wbs?attribute=ps_meiro_user_id&value=testUserId&segment=42&category_id=1305',
       );
     });
+
+    test('creates URL from a complete instance URL', () {
+      final url = MeiroAudienceUrlCreator.buildUrl(
+        userId: 'testUserId',
+        instanceUrl: Uri.parse('https://cdp.inst.meiro.app'),
+        segment: null,
+        parameters: const {},
+      );
+
+      expect(
+        url.toString(),
+        'https://cdp.inst.meiro.app/wbs?attribute=ps_meiro_user_id&value=testUserId',
+      );
+    });
+
+    test('requires exactly one instance input', () {
+      expect(
+        () => MeiroAudienceUrlCreator.buildUrl(
+          userId: 'testUserId',
+          instance: 'inst',
+          instanceUrl: Uri.parse('https://cdp.inst.meiro.app'),
+          segment: null,
+          parameters: const {},
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 }
-

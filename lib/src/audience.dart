@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 abstract interface class MeiroAudience {
   /// Sends a WBS request to the Audience API.
   Future<MeiroAudienceResult> wbs({
-    required String instance,
+    String? instance,
+    Uri? instanceUrl,
     Map<String, String> parameters = const <String, String>{},
     int? segment,
   });
@@ -56,13 +57,15 @@ class MeiroAudienceImpl implements MeiroAudience {
 
   @override
   Future<MeiroAudienceResult> wbs({
-    required String instance,
+    String? instance,
+    Uri? instanceUrl,
     Map<String, String> parameters = const <String, String>{},
     int? segment,
   }) async {
     final url = MeiroAudienceUrlCreator.buildUrl(
       userId: _userIdProvider(),
       instance: instance,
+      instanceUrl: instanceUrl,
       segment: segment,
       parameters: parameters,
     );
@@ -99,15 +102,35 @@ class MeiroAudienceUrlCreator {
   /// Builds the Audience WBS URL.
   static Uri buildUrl({
     required String userId,
-    required String instance,
+    String? instance,
+    Uri? instanceUrl,
     required int? segment,
     required Map<String, String> parameters,
   }) {
-    return Uri.https('cdp.$instance.meiro.io', '/wbs', {
-      'attribute': 'ps_meiro_user_id',
-      'value': userId,
-      if (segment != null) 'segment': segment.toString(),
-      ...parameters,
-    });
+    if ((instance == null) == (instanceUrl == null)) {
+      throw ArgumentError('Provide exactly one of instance or instanceUrl');
+    }
+
+    final baseUrl = instanceUrl ?? Uri.https('cdp.$instance.meiro.io');
+    if (!baseUrl.hasScheme || baseUrl.host.isEmpty) {
+      throw ArgumentError.value(
+        instanceUrl,
+        'instanceUrl',
+        'Must be an absolute URL',
+      );
+    }
+
+    return baseUrl.replace(
+      pathSegments: <String>[
+        ...baseUrl.pathSegments.where((segment) => segment.isNotEmpty),
+        'wbs',
+      ],
+      queryParameters: <String, String>{
+        'attribute': 'ps_meiro_user_id',
+        'value': userId,
+        if (segment != null) 'segment': segment.toString(),
+        ...parameters,
+      },
+    ).removeFragment();
   }
 }
