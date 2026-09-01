@@ -7,3 +7,4 @@ export 'src/meiro_navigator_observer.dart';
 export 'src/meiro_sdk.dart';
 export 'src/notifications.dart'
     show MeiroNotificationAction, MeiroNotificationData, MeiroNotifications;
+export 'src/profile.dart';

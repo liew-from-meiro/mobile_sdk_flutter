@@ -103,6 +103,9 @@ The default observer uses `route.settings.name` as the screen name. For custom r
 
 The SDK integrates with `firebase_messaging` and `flutter_local_notifications`.
 
+When `endpoint` is a Pipes `/collect/:sourceSlug` URL, the SDK automatically
+sends Mobile Push reports to `/api/channels/push/events` on the same host.
+
 When `pushEnabled` is true:
 
 - FCM token refreshes are passed to `MeiroSdk.setFcmToken`.
@@ -120,11 +123,11 @@ if (MeiroNotifications.isMeiroMessage(message)) {
 }
 ```
 
-## Audience API
+## V1 Audience API
 
 ```dart
 final result = await MeiroSdk.audience.wbs(
-  instance: 'client-instance',
+  instanceUrl: Uri.parse('https://cdp.client-instance.meiro.app'),
   segment: 42,
   parameters: {'category_id': '1305'},
 );
@@ -132,6 +135,34 @@ final result = await MeiroSdk.audience.wbs(
 print(result.returnedAttributes);
 print(result.data);
 ```
+
+## V2 Profile API
+
+Create a Profile API endpoint in V2 Pipes that allows the `mobile_user_id`
+identifier type. Pass its complete endpoint URL and use the SDK user ID for the
+lookup:
+
+```dart
+import 'package:meiro_sdk/meiro_sdk.dart';
+
+final profileApi = MeiroProfile(
+  endpoint: Uri.parse(
+    'https://pipes.example.com/profile-api/mobile-app',
+  ),
+  apiKey: 'optional-profile-api-key',
+);
+
+final profile = await profileApi.getProfile(
+  identifierValue: MeiroSdk.userId,
+);
+
+print(profile.profileId);
+print(profile.attributes);
+print(profile.audiences);
+```
+
+Profile API keys embedded in a mobile application can be extracted. Use a
+backend proxy when the returned profile data requires real authorization.
 
 ## Offline Support
 

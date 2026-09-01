@@ -7,16 +7,23 @@ import 'event.dart';
 /// HTTP client for the Meiro mobile event endpoint.
 class MeiroEventsApi {
   /// Creates an event API client.
-  MeiroEventsApi({required Uri endpoint, http.Client? client})
+  MeiroEventsApi({
+    required Uri endpoint,
+    http.Client? client,
+  })
     : _client = client ?? http.Client(),
-      _eventsUrl = endpoint.replace(
-        pathSegments: [
-          ...endpoint.pathSegments,
-        ].where((segment) => segment.isNotEmpty).toList(),
-      );
+      _eventsUrl = _normalizeEndpoint(endpoint),
+      _pushEventsUrl = _derivePipesPushEventsEndpoint(endpoint);
 
   final http.Client _client;
   final Uri _eventsUrl;
+  final Uri? _pushEventsUrl;
+
+  static final _mobilePushReportEventTypeIds = <String>{
+    MeiroEventType.fcmTokenRegistered.id,
+    MeiroEventType.fcmMessageReceived.id,
+    MeiroEventType.fcmMessageClick.id,
+  };
 
   /// Event endpoint URL.
   Uri get eventsUrl => _eventsUrl;
@@ -29,7 +36,7 @@ class MeiroEventsApi {
   /// Sends a serialized payload map.
   Future<void> sendPayload(Map<String, Object?> payload) async {
     final response = await _client.post(
-      _eventsUrl,
+      _resolveEndpoint(payload),
       headers: const {'content-type': 'application/json'},
       body: jsonEncode(payload),
     );
@@ -40,6 +47,45 @@ class MeiroEventsApi {
         response.body,
       );
     }
+  }
+
+  Uri _resolveEndpoint(Map<String, Object?> payload) {
+    final pushEventsUrl = _pushEventsUrl;
+    if (pushEventsUrl != null &&
+        _mobilePushReportEventTypeIds.contains(payload['event_type'])) {
+      return pushEventsUrl;
+    }
+    return _eventsUrl;
+  }
+
+  static Uri _normalizeEndpoint(Uri endpoint) {
+    return endpoint.replace(
+      pathSegments: endpoint.pathSegments
+          .where((segment) => segment.isNotEmpty)
+          .toList(),
+    );
+  }
+
+  static Uri? _derivePipesPushEventsEndpoint(Uri endpoint) {
+    final pathSegments = endpoint.pathSegments
+        .where((segment) => segment.isNotEmpty)
+        .toList();
+    final collectIndex = pathSegments.lastIndexOf('collect');
+    if (collectIndex < 0 || collectIndex != pathSegments.length - 2) {
+      return null;
+    }
+
+    // ponytail: derive only standard Pipes URLs; add an override if custom
+    // gateways need a different push-report route.
+    return Uri.parse(endpoint.origin).replace(
+      pathSegments: <String>[
+        ...pathSegments.take(collectIndex),
+        'api',
+        'channels',
+        'push',
+        'events',
+      ],
+    );
   }
 }
 
