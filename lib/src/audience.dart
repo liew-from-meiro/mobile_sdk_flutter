@@ -126,12 +126,11 @@ class MeiroAudienceUrlCreator {
         'wbs',
       ],
       queryParameters: <String, String>{
-      'attribute': 'ps_meiro_user_id',
-      'value': userId,
-      if (segment != null) 'segment': segment.toString(),
-      ...parameters,
+        'attribute': 'ps_meiro_user_id',
+        'value': userId,
+        if (segment != null) 'segment': segment.toString(),
+        ...parameters,
       },
-      fragment: '',
-    );
+    ).removeFragment();
   }
 }
